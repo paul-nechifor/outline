@@ -31,6 +31,11 @@ processOptions = (options) ->
   if options.minify
     config.minify = true
 
+task_ = (cmd, desc, func) ->
+  task cmd, desc, (options) ->
+    processOptions options
+    func()
+
 compileStylus = (inFile, outFile, cb) ->
   input = fs.readFileSync(inFile).toString()
   s = stylus input
@@ -76,11 +81,12 @@ actions =
 
   app: (cb) ->
     actions.run ['compileApp', 'compileRoutes', 'copyFiles', 'compileStylus',
-                 'writeConfig']
+                 'commandify', 'browserify', 'writeConfig']
 
   copyFiles: (cb) ->
     shell """
       mkdir -p build/static/b/css build/static/b/js >/dev/null 2>/dev/null
+      cp -r static/ build/
       cp -r views build/views
       cd build/bower_components/bootstrap/dist
       cp -r fonts ../../../static/b
@@ -89,13 +95,19 @@ actions =
     """, cb
 
   compileApp: (cb) ->
-    shell 'coffee --compile --output build/app app', cb
+    shell 'coffee --compile --bare --output build/app app', cb
 
   compileRoutes: (cb) ->
-    shell 'coffee --compile --output build/routes routes', cb
+    shell 'coffee --compile --bare --output build/routes routes', cb
 
   compileStylus: (cb) ->
     compileStylus 'styles/main.styl', 'build/static/main.css', cb
+
+  commandify: (cb) ->
+    cmd = 'build/app/main.js'
+    main = fs.readFileSync cmd
+    fs.writeFileSync cmd, '#!/usr/bin/env node\n\n' + main
+    shell 'chmod +x ' + cmd, cb
 
   browserify: (cb) ->
     b = browserify()
@@ -126,6 +138,42 @@ actions =
     args = ("--exclude='#{e}'" for e in exclude)
     shell "tar -czf #{archive} build #{args.join(' ')}", ->
 
+  deploy: (cb) ->
+    shell """
+      ssh root@#{config.deploy.server} <<END
+      # Stop the old if it exists.
+      supervisorctl stop #{config.name}
+      END
+
+      ssh #{config.deploy.user}@#{config.deploy.server} <<END
+      # Create the install location or ignore.
+      mkdir -p #{config.deploy.installPath} 2>/dev/null
+      END
+
+      # Rsync the new files.
+      rsync -a --del build/ #{config.deploy.server}:#{config.deploy.installPath}/
+
+      ssh root@#{config.deploy.server} <<END
+
+      # Install the supervisor config file.
+      cat > /etc/supervisor/conf.d/#{config.name}.conf <<END2
+      #{config.deploy.supervisorScript}
+      END2
+
+      # Refresh supervisor config.
+      supervisorctl reread
+      supervisorctl update
+      supervisorctl start #{config.name}
+
+      END
+
+    """, cb
+
+  remoteLog: (cb) ->
+    host = config.deploy.user + '@' + config.deploy.server
+    host = "#{config.deploy.user}@#{config.deploy.server}"
+
+    command 'ssh', [host, 'tail', '-f', "/var/log/#{config.name}.out.log"], cb
 
 option '-m', '--minify', 'minify the client'
 
@@ -141,12 +189,14 @@ task 'bower', 'Update `bower.json` and install needed requirements.', ->
 task 'npm', 'Update `package.json` and install needed requirements.', ->
   actions.npm ->
 
-task 'app', 'Build the server app.', ->
+task_ 'app', 'Build the server app.', ->
   actions.run ['reset', 'app']
 
 task 'wrap', 'Compress the build.', ->
   actions.wrap ->
 
-task 'client', 'Build the client.', (options) ->
-  processOptions(options)
-  actions.browserify ->
+task 'deploy', 'Deploy to the remote server.', ->
+  actions.deploy ->
+
+task 'remote-log', 'Follow log from remote host.', ->
+  actions.remoteLog ->

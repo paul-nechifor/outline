@@ -40,7 +40,7 @@ class App
   createServer: (cb) ->
     @server = http.createServer @express
     @server.listen @config.port, =>
-      console.log @config.packageJson.name, 'server listening on', @config.port
+      console.log @config.name, 'server listening on', @config.port
       cb()
 
 module.exports = App;
