@@ -26,15 +26,11 @@ config =
     dependencies:
       express: '3.4.5'
       jade: '*'
-      request: '>=2.34.0'
-      soap: '>=0.4.0'
-      ws: '>=0.4.30'
     devDependencies:
       stylus: '*'
       browserify: '>=3.31.2'
       coffeeify: '>=0.6.0'
       'uglify-js': '2.4.12'
-      control: '>=0.2.3'
 
 config.deploy.supervisorScript =
   """
