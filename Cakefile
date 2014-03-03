@@ -131,7 +131,7 @@ actions =
     sh """
       ssh root@#{config.deploy.server} <<END
       # Stop the old if it exists.
-      supervisorctl stop #{config.name}
+      supervisorctl stop #{config.name} 2>/dev/null
       END
 
       ssh #{config.deploy.user}@#{config.deploy.server} <<END
@@ -152,7 +152,7 @@ actions =
       # Refresh supervisor config.
       supervisorctl reread
       supervisorctl update
-      supervisorctl start #{config.name}
+      supervisorctl start #{config.name} 2>/dev/null
 
       END
 
