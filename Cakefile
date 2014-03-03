@@ -131,16 +131,6 @@ actions =
   writeConfig: (cb) ->
     fs.writeFileSync 'build/config.json', JSON.stringify(config)
 
-  wrap: (cb) ->
-    archive = 'build/build.tar.gz'
-    # Exclude development dependencies.
-    dev = Object.keys config.packageJson.devDependencies
-    exclude = ('build/node_modules/' + f for f in dev)
-    exclude.push archive
-    exclude.push 'build/bower_components'
-    args = ("--exclude='#{e}'" for e in exclude)
-    shell "tar -czf #{archive} build #{args.join(' ')}", ->
-
   deploy: (cb) ->
     shell """
       ssh root@#{config.deploy.server} <<END
@@ -197,9 +187,6 @@ task_ 'build', 'Build the server app.', ->
 
 task 'run', 'Run the node server locally.', ->
   actions.runServer ->
-
-task 'wrap', 'Compress the build.', ->
-  actions.wrap ->
 
 task 'deploy', 'Deploy to the remote server.', ->
   actions.deploy ->
