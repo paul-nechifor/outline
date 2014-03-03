@@ -75,12 +75,12 @@ actions =
     fs.writeFileSync 'build/package.json', JSON.stringify(config.packageJson)
     sh 'cd build; npm install', cb
 
+  build: (cb) ->
+    actions.run ['copyFiles', 'compileApp', 'compileRoutes', 'compileStylus',
+        'commandify', 'browserify', 'writeConfig']
+
   runServer: (cb) ->
     command 'node', ['build/app/main.js'], cb
-
-  build: (cb) ->
-    actions.run ['compileApp', 'compileRoutes', 'copyFiles', 'compileStylus',
-        'commandify', 'browserify', 'writeConfig']
 
   copyFiles: (cb) ->
     sh """
