@@ -56,15 +56,11 @@ actions =
         next()
     next()
 
-  makeBuild: (cb) ->
-    return cb() if fs.existsSync 'build'
-    sh 'mkdir build', cb
-
   reset: (cb) ->
     keep =
       'bower_components': true
       'node_modules': true
-    actions.makeBuild ->
+    sh 'mkdir build 2>/dev/null; true', ->
       subs = fs.readdirSync('build')
       subs = ('build/' + f for f in subs when not keep[f])
       return cb() if subs.length == 0
@@ -82,13 +78,13 @@ actions =
   runServer: (cb) ->
     command 'node', ['build/app/main.js'], cb
 
-  app: (cb) ->
+  build: (cb) ->
     actions.run ['compileApp', 'compileRoutes', 'copyFiles', 'compileStylus',
-                 'commandify', 'browserify', 'writeConfig']
+        'commandify', 'browserify', 'writeConfig']
 
   copyFiles: (cb) ->
     sh """
-      mkdir -p build/static/b/css build/static/b/js >/dev/null 2>/dev/null
+      mkdir -p build/static/b/css build/static/b/js 2>/dev/null
       cp -r static/ build/
       cp -r views build/views
       cd build/bower_components/bootstrap/dist
@@ -122,7 +118,7 @@ actions =
     , (err, result) ->
       throw err if err
       if config.minify
-        done = uglifyJs.minify result, {fromString: true}
+        done = uglifyJs.minify result, fromString: true
         fs.writeFileSync 'build/static/client.js', done.code
       else
         fs.writeFileSync 'build/static/client.js', result
@@ -163,12 +159,10 @@ actions =
     """, cb
 
   remoteLog: (cb) ->
-    host = config.deploy.user + '@' + config.deploy.server
     host = "#{config.deploy.user}@#{config.deploy.server}"
-
     command 'ssh', [host, 'tail', '-f', "/var/log/#{config.name}.out.log"], cb
 
-option '-m', '--minify', 'minify the client'
+option '-m', '--minify', 'Minify the client on build.'
 
 task 'init', 'Create `build` and import the requirements.', ->
   actions.run ['reset', 'npm', 'bower']
@@ -182,8 +176,8 @@ task 'bower', 'Update `bower.json` and install needed requirements.', ->
 task 'npm', 'Update `package.json` and install needed requirements.', ->
   actions.npm ->
 
-task_ 'build', 'Build the server app.', ->
-  actions.run ['reset', 'app']
+task_ 'build', 'Build everything.', ->
+  actions.run ['reset', 'build']
 
 task 'run', 'Run the node server locally.', ->
   actions.runServer ->
