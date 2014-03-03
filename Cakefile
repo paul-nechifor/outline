@@ -111,7 +111,7 @@ actions =
 
   browserify: (cb) ->
     b = browserify()
-    b.add './client/client.coffee'
+    b.add './client/main.coffee'
     b.transform coffeeify
     b.bundle
       debug: true
@@ -122,7 +122,7 @@ actions =
         done = uglifyJs.minify result, {fromString: true}
         fs.writeFileSync 'build/static/client.js', done.code
       else
-        fs.writeFile 'build/static/client.js', result
+        fs.writeFileSync 'build/static/client.js', result
       cb()
 
   writeConfig: (cb) ->
