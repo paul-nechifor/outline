@@ -27,7 +27,8 @@ class App
     e.use express.logger @config.loggerFormat
 
     e.use express.favicon()
-    e.use express.bodyParser()
+    e.use express.urlencoded()
+    e.use express.json()
     e.use express.methodOverride()
     e.use express.cookieParser @config.cookieSecret
     e.use express.session()
