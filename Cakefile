@@ -14,7 +14,7 @@ coffeeify = requireMaybe './build/node_modules/coffeeify'
 uglifyJs = requireMaybe './build/node_modules/uglify-js'
 stylus = requireMaybe './build/node_modules/stylus'
 
-shell = (commands, cb) ->
+sh = (commands, cb) ->
   exec commands, (err, stdout, stderr) ->
     throw err if err
     out = stdout + stderr
@@ -58,7 +58,7 @@ actions =
 
   makeBuild: (cb) ->
     return cb() if fs.existsSync 'build'
-    shell 'mkdir build', cb
+    sh 'mkdir build', cb
 
   reset: (cb) ->
     keep =
@@ -73,11 +73,11 @@ actions =
 
   bower: (cb) ->
     fs.writeFileSync 'build/bower.json', JSON.stringify(config.bower)
-    shell 'cd build; bower install', cb
+    sh 'cd build; bower install', cb
 
   npm: (cb) ->
     fs.writeFileSync 'build/package.json', JSON.stringify(config.packageJson)
-    shell 'cd build; npm install', cb
+    sh 'cd build; npm install', cb
 
   runServer: (cb) ->
     command 'node', ['build/app/main.js'], cb
@@ -87,7 +87,7 @@ actions =
                  'commandify', 'browserify', 'writeConfig']
 
   copyFiles: (cb) ->
-    shell """
+    sh """
       mkdir -p build/static/b/css build/static/b/js >/dev/null 2>/dev/null
       cp -r static/ build/
       cp -r views build/views
@@ -98,10 +98,10 @@ actions =
     """, cb
 
   compileApp: (cb) ->
-    shell 'coffee --compile --bare --output build/app app', cb
+    sh 'coffee --compile --bare --output build/app app', cb
 
   compileRoutes: (cb) ->
-    shell 'coffee --compile --bare --output build/routes routes', cb
+    sh 'coffee --compile --bare --output build/routes routes', cb
 
   compileStylus: (cb) ->
     compileStylus 'styles/main.styl', 'build/static/main.css', cb
@@ -110,7 +110,7 @@ actions =
     cmd = 'build/app/main.js'
     main = fs.readFileSync cmd
     fs.writeFileSync cmd, '#!/usr/bin/env node\n\n' + main
-    shell 'chmod +x ' + cmd, cb
+    sh 'chmod +x ' + cmd, cb
 
   browserify: (cb) ->
     b = browserify()
@@ -132,7 +132,7 @@ actions =
     fs.writeFileSync 'build/config.json', JSON.stringify(config)
 
   deploy: (cb) ->
-    shell """
+    sh """
       ssh root@#{config.deploy.server} <<END
       # Stop the old if it exists.
       supervisorctl stop #{config.name}
