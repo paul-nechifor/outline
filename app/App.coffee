@@ -21,8 +21,12 @@ class App
     e.set 'port', @config.port
     e.set 'views', __dirname + '/../views'
     e.set 'view engine', 'jade'
+
+    # Add date logger token.
+    express.logger.token 'date', -> new Date().toISOString()
+    e.use express.logger @config.loggerFormat
+
     e.use express.favicon()
-    e.use express.logger('dev') if e.get('env') is 'development'
     e.use express.bodyParser()
     e.use express.methodOverride()
     e.use express.cookieParser @config.cookieSecret

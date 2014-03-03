@@ -5,6 +5,7 @@ config =
   minify: false
   port: 3000
   cookieSecret: 'cookie secret'
+  loggerFormat: ':date :remote-addr :status :method :url :response-time'
 
   deploy:
     server: 'example.com'
