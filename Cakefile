@@ -79,6 +79,9 @@ actions =
     fs.writeFileSync 'build/package.json', JSON.stringify(config.packageJson)
     shell 'cd build; npm install', cb
 
+  runServer: (cb) ->
+    command 'node', ['build/app/main.js'], cb
+
   app: (cb) ->
     actions.run ['compileApp', 'compileRoutes', 'copyFiles', 'compileStylus',
                  'commandify', 'browserify', 'writeConfig']
@@ -178,7 +181,7 @@ actions =
 option '-m', '--minify', 'minify the client'
 
 task 'init', 'Create `build` and import the requirements.', ->
-  console.log 'asdf'
+  actions.run ['reset', 'npm', 'bower']
 
 task 'reset', 'Clean `build` except for the downloaded requirements.', ->
   actions.reset ->
@@ -189,8 +192,11 @@ task 'bower', 'Update `bower.json` and install needed requirements.', ->
 task 'npm', 'Update `package.json` and install needed requirements.', ->
   actions.npm ->
 
-task_ 'app', 'Build the server app.', ->
+task_ 'build', 'Build the server app.', ->
   actions.run ['reset', 'app']
+
+task 'run', 'Run the node server locally.', ->
+  actions.runServer ->
 
 task 'wrap', 'Compress the build.', ->
   actions.wrap ->
