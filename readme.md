@@ -30,3 +30,7 @@ To deploy it fiddle with `config.deploy` in `config.coffee`. You might want to
 put the changes in `secret.coffee`. Deploy to the server:
 
     cake deploy
+
+## Licence
+
+MIT
