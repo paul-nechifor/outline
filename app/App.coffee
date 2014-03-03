@@ -32,8 +32,8 @@ class App
     e.use express.methodOverride()
     e.use express.cookieParser @config.cookieSecret
     e.use express.session()
-    e.use e.router
     e.use '/s', express.static __dirname + '/../static'
+    e.use e.router
 
   registerRoutes: ->
     e = @express
