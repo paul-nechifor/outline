@@ -1,4 +1,7 @@
 /build
+/node_modules
+/bower_components
+/bower.json
 /secret.coffee
 
 .idea

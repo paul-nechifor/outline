@@ -25,13 +25,10 @@ config =
     version: '0.0.1'
     private: false # Maybe you need to change it?
     dependencies:
-      express: '3.4.5'
-      jade: '*'
+      express: '>=3.4.5'
+      jade: '>=1.3.0'
     devDependencies:
-      stylus: '*'
-      browserify: '>=3.31.2'
-      coffeeify: '>=0.6.0'
-      'uglify-js': '2.4.12'
+      'web-build-tools': '>=0.0.1'
     license: 'MIT'
 
 config.deploy.supervisorScript =

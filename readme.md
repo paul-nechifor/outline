@@ -8,11 +8,15 @@ minification.
 The project is written in CoffeeScript and you have to have `cake` to build it.
 Install it:
 
-    npm install -g coffee-script
+    sudo npm install -g coffee-script
 
-To read the description of all the available tasks:
+You also need bower:
 
-    cake
+    sudo npm install -g bower
+
+Download the dependencies:
+
+    npm install
 
 Initialize the project:
 
@@ -30,6 +34,10 @@ To deploy it fiddle with `config.deploy` in `config.coffee`. You might want to
 put the changes in `secret.coffee`. Deploy to the server:
 
     cake deploy
+
+To read the description of all the available tasks:
+
+    cake
 
 ## Licence
 
